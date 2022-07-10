@@ -1,5 +1,5 @@
 [package]
-name = "actix_web"
+name = "transaction-decoder"
 version = "0.1.0"
 edition = "2021"
 

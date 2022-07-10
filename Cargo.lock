@@ -182,16 +182,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "actix_web"
-version = "0.1.0"
-dependencies = [
- "actix-web",
- "reqwest",
- "serde 1.0.138",
- "serde_json 0.9.10",
-]
-
-[[package]]
 name = "adler"
 version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1379,6 +1369,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b7358be39f2f274f322d2aaed611acc57f382e8eb1e5b48cb9ae30933495ce7"
 dependencies = [
  "once_cell",
+]
+
+[[package]]
+name = "transaction-decoder"
+version = "0.1.0"
+dependencies = [
+ "actix-web",
+ "reqwest",
+ "serde 1.0.138",
+ "serde_json 0.9.10",
 ]
 
 [[package]]

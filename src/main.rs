@@ -184,13 +184,19 @@ fn match_method_in_contract(code: &String, methods: Vec<String>) -> String {
             Some(ind) => ind + first_b,
             None => continue,
         };
+        let mut flag = true;
         for arg in method.args {
             match code[first_b..last_b].find(&arg) {
                 Some(_) => continue,
-                None => break,
+                None => {
+                    flag = false;
+                    break;
+                }
             }
         }
-        return method.full_name;
+        if flag {
+            return method.full_name;
+        }
     }
     "".to_string()
 }
