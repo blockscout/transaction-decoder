@@ -12,43 +12,6 @@ struct ContractCall {
     contract: String,
     txn: String,
 }
-/*
-#[derive(Deserialize)]
-struct TxnInfoLog {
-    address: String,
-    data: String,
-    index: u32,
-    topics: Vec<String>,
-}
-
-#[derive(Deserialize)]
-struct TxnInfoResult {
-    confirmations: String,
-    from: String,
-    gasLimit: u32,
-    gasPrice: u32,
-    gasUsed: u32,
-    hash: String,
-    input: String,
-    timeStamp: u32,
-    logs: Vec<TxnInfoLog>,
-    next_page_params: String,
-    revertReason: String,
-    success: bool,
-    to: String,
-    value: u32,
-}
-
-#[derive(Deserialize)]
-struct TxnInfoResponse {
-    message: String,
-    result: TxnInfoResult,
-    status: i32,
-}
-*/
-
-// curl -X POST --data '{"id":0,"jsonrpc":"2.0","method": "eth_blockNumber","params": []}'
-/// extract `Contract` using serde
 
 async fn get_txn_info(txn: &String) -> String {
     let res = reqwest::get(format!(
@@ -113,7 +76,7 @@ fn decode_methods(methods: &String) -> Vec<String> {
     println!("{}", cnt);
     let cnt = match cnt {
         Value::Number(n) => n,
-        other => panic!("other"),
+        _other => panic!("other"),
     };
 
     let cnt = match cnt.as_u64() {
