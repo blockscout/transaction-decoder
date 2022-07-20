@@ -1,17 +1,9 @@
 import requests
+import json
 
-abi = [
-    {
-        "inputs": [
-            {"internalType": "address", "name": "recipient", "type": "address"},
-            {"internalType": "uint256", "name": "amount", "type": "uint256"},
-        ],
-        "name": "transfer",
-        "outputs": [{"internalType": "bool", "name": "", "type": "bool"}],
-        "stateMutability": "nonpayable",
-        "type": "function",
-    }
-]
+with open("abi.json", "r") as f:
+    abi = json.load(f)
+
 
 with open("contract.txt", "r") as f:
     code = f.read()
