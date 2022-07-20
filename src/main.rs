@@ -2,8 +2,6 @@ use actix_web::{error, web, App, HttpServer, Responder};
 use derive_more::{Display, Error};
 use sha3::{Digest, Keccak256};
 
-use reqwest;
-
 pub mod structs;
 use crate::structs::{AbiMethod, Request, Response, Transaction};
 
@@ -57,10 +55,7 @@ fn get_method_full_string(method: &AbiMethod) -> Result<String> {
     Ok(format!("{}({})", method.name, args))
 }
 
-async fn find_abi_method_by_txn_input(
-    input: &String,
-    methods: &Vec<AbiMethod>,
-) -> Result<AbiMethod> {
+async fn find_abi_method_by_txn_input(input: &str, methods: &Vec<AbiMethod>) -> Result<AbiMethod> {
     for method in methods {
         let hex = get_hex(&get_method_full_string(method)?)?;
         if input[2..10].eq(&hex[..8]) {
@@ -79,7 +74,7 @@ fn get_hex(input: &String) -> Result<String> {
     Ok(format!("{:x}", res))
 }
 
-fn find_method_in_contract(contract: &String, method: &AbiMethod) -> Result<usize> {
+fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<usize> {
     let start = contract.find(&format!("function {}", method.name));
     let start = match start {
         Some(v) => v,
@@ -93,7 +88,7 @@ fn find_method_in_contract(contract: &String, method: &AbiMethod) -> Result<usiz
     Ok(line_number)
 }
 
-fn find_line_number_in_contract(contract: &String, index: usize) -> usize {
+fn find_line_number_in_contract(contract: &str, index: usize) -> usize {
     let mut n = 0;
     for (i, c) in contract.chars().enumerate() {
         if i >= index {
