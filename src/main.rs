@@ -1,180 +1,120 @@
-use actix_web::{web, App, HttpServer, Result};
-use serde::Deserialize;
-extern crate serde_json;
-use serde_json::Value;
+use actix_web::{error, web, App, HttpServer, Responder};
+use derive_more::{Display, Error};
+use sha3::{Digest, Keccak256};
 
-//extern crate reqwest;
 use reqwest;
-// This struct represents state
 
-#[derive(Deserialize)]
-struct ContractCall {
-    contract: String,
-    txn: String,
+pub mod structs;
+use crate::structs::{AbiMethod, Request, Response, Transaction};
+
+type Result<T> = std::result::Result<T, MyError>;
+#[derive(Debug, Display, Error)]
+#[display(fmt = "my error: {}", name)]
+struct MyError {
+    name: &'static str,
 }
 
-async fn get_txn_info(txn: &String) -> String {
+impl From<reqwest::Error> for MyError {
+    fn from(_: reqwest::Error) -> Self {
+        MyError { name: "error" }
+    }
+}
+
+impl From<serde_json::Error> for MyError {
+    fn from(_: serde_json::Error) -> Self {
+        MyError { name: "error" }
+    }
+}
+
+impl From<actix_web::Error> for MyError {
+    fn from(_: actix_web::Error) -> Self {
+        MyError { name: "error" }
+    }
+}
+
+impl error::ResponseError for MyError {}
+
+async fn get_txn_input(txn_hash: &String) -> Result<String> {
     let res = reqwest::get(format!(
         "https://blockscout.com/eth/mainnet/api?module=transaction&action=gettxinfo&txhash={}",
-        txn
+        txn_hash
     ))
-    .await;
+    .await?;
+    let res = res.text().await?;
 
-    let res = match res {
-        Ok(r) => r,
-        Err(err) => panic!("{}", err),
-    };
+    let res: Transaction = serde_json::from_str(&res)?;
 
-    let res = res.text().await;
-
-    let res = match res {
-        Ok(r) => r,
-        Err(err) => panic!("{}", err),
-    };
-
-    res
+    Ok(res.result.input)
 }
 
-fn get_txn_input_bytes(txn: &String) -> String {
-    let data: Value = serde_json::from_str(&txn).unwrap();
-    let obj = data.as_object().unwrap();
-    let s = String::from(format!(
-        "{}",
-        obj.get("result").unwrap().get("input").unwrap()
-    ));
-    let res = &s[1..11];
-    res.to_string()
+fn get_method_full_string(method: &AbiMethod) -> Result<String> {
+    let v = method.inputs.clone();
+    let args = v
+        .into_iter()
+        .map(|x| x.arg_type)
+        .collect::<Vec<_>>()
+        .join(",");
+    Ok(format!("{}({})", method.name, args))
 }
 
-async fn get_txn_method(input: &String) -> String {
-    //https://www.4byte.directory/signatures/?bytes4_signature=0xa7ca0ba3
-    let res = reqwest::get(format!(
-        "https://www.4byte.directory/api/v1/signatures/?hex_signature={}",
-        input
-    ))
-    .await;
-
-    let res = match res {
-        Ok(r) => r,
-        Err(err) => panic!("{}", err),
-    };
-
-    let res = res.text().await;
-
-    let res = match res {
-        Ok(r) => r,
-        Err(err) => panic!("{}", err),
-    };
-
-    res
-}
-
-fn decode_methods(methods: &String) -> Vec<String> {
-    let data: Value = serde_json::from_str(&methods).unwrap();
-    let obj = data.as_object().unwrap();
-    let cnt = obj.get("count").unwrap();
-    println!("{}", cnt);
-    let cnt = match cnt {
-        Value::Number(n) => n,
-        _other => panic!("other"),
-    };
-
-    let cnt = match cnt.as_u64() {
-        Some(x) => x,
-        None => panic!("None"),
-    };
-    if cnt == 0 {
-        return Vec::new();
-    }
-
-    let variants = obj.get("results").unwrap();
-
-    let variants = match variants.as_array() {
-        Some(v) => v,
-        None => panic!("None"),
-    };
-
-    let mut results: Vec<String> = Vec::new();
-    for variant in variants.iter() {
-        let s = variant.get("text_signature").unwrap().to_string();
-        println!("s.len: {}", s.len());
-        results.push(s[1..(s.len() - 1)].to_string());
-    }
-
-    results
-}
-
-struct Method {
-    full_name: String,
-    name: String,
-    args: Vec<String>,
-}
-
-fn process_method(method: String) -> Method {
-    let first_b = match method.find("(") {
-        Some(i) => i,
-        None => panic!("Invalid method"),
-    };
-    let last_b = match method.find(")") {
-        Some(i) => i,
-        None => panic!("Invalid method"),
-    };
-    let name = method[..first_b].to_string();
-    let args = method[first_b..last_b].split(',');
-    let args: Vec<&str> = args.collect();
-    let args: Vec<String> = args.iter().map(|&x| x.into()).collect();
-
-    Method {
-        name,
-        args,
-        full_name: method,
-    }
-}
-
-fn match_method_in_contract(code: &String, methods: Vec<String>) -> String {
-    let methods: Vec<Method> = methods
-        .iter()
-        .map(|m| process_method(m.to_string()))
-        .collect();
+async fn find_abi_method_by_txn_input(
+    input: &String,
+    methods: &Vec<AbiMethod>,
+) -> Result<AbiMethod> {
     for method in methods {
-        let name_match = code.find(&method.name);
-        let name_match = match name_match {
-            Some(name) => name,
-            None => continue,
-        };
-        let first_b = name_match + method.name.len();
-        let last_b = match code[first_b..].find(")") {
-            Some(ind) => ind + first_b,
-            None => continue,
-        };
-        let mut flag = true;
-        for arg in method.args {
-            match code[first_b..last_b].find(&arg) {
-                Some(_) => continue,
-                None => {
-                    flag = false;
-                    break;
-                }
-            }
-        }
-        if flag {
-            return method.full_name;
+        let hex = get_hex(&get_method_full_string(method)?)?;
+        if input[2..10].eq(&hex[..8]) {
+            return Ok(method.clone());
         }
     }
-    "".to_string()
+    Err(MyError {
+        name: "method not found",
+    })
 }
 
-async fn index(contract_call: web::Json<ContractCall>) -> Result<String> {
-    let data = get_txn_info(&contract_call.txn).await;
-    let input_bytes = get_txn_input_bytes(&data);
-    let methods = get_txn_method(&input_bytes).await;
-    let methods = decode_methods(&methods);
-    let result = match_method_in_contract(&contract_call.contract, methods);
-    if result.len() == 0 {
-        return Ok("Method not found".to_string());
-    }
+fn get_hex(input: &String) -> Result<String> {
+    let mut hasher = Keccak256::new();
+    hasher.update(input.as_bytes());
+    let res = hasher.finalize();
+    Ok(format!("{:x}", res))
+}
 
-    Ok(result)
+fn find_method_in_contract(contract: &String, method: &AbiMethod) -> Result<usize> {
+    let start = contract.find(&format!("function {}", method.name));
+    let start = match start {
+        Some(v) => v,
+        None => {
+            return Err(MyError {
+                name: "method not found",
+            })
+        }
+    };
+    let line_number = find_line_number_in_contract(contract, start);
+    Ok(line_number)
+}
+
+fn find_line_number_in_contract(contract: &String, index: usize) -> usize {
+    let mut n = 0;
+    for (i, c) in contract.chars().enumerate() {
+        if i >= index {
+            break;
+        }
+        if c == '\n' {
+            n += 1;
+        }
+    }
+    n
+}
+
+async fn index(req: web::Json<Request>) -> Result<impl Responder> {
+    let txn_input = get_txn_input(&req.txn).await?;
+    let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
+    let line_number = find_method_in_contract(&req.contract, &method)? as u32 + 1;
+    let response = Response {
+        method,
+        line_number,
+    };
+    Ok(web::Json(response))
 }
 
 #[actix_web::main]
