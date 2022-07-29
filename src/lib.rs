@@ -98,7 +98,7 @@ fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<u32> {
         start = contract[start..]
             .find(&format!("function {}", method.name))
             .ok_or(Error::BadClientData)?;
-        let end = contract[start..].find(")").ok_or(Error::NotFound)? + start;
+        let end = contract[start..].find(')').ok_or(Error::NotFound)? + start;
 
         if re.replace_all(&contract[(start + "function ".len())..end + 1], "") == signature {
             break;
