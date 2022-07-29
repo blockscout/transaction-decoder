@@ -1,4 +1,8 @@
-use actix_web::{error, web, Responder, HttpResponse, http::{header::ContentType, StatusCode}};
+use actix_web::{
+    error,
+    http::{header::ContentType, StatusCode},
+    web, HttpResponse, Responder,
+};
 use derive_more::{Display, Error};
 use sha3::{Digest, Keccak256};
 
@@ -48,7 +52,7 @@ impl error::ResponseError for Error {
         match *self {
             Error::InternalError => StatusCode::INTERNAL_SERVER_ERROR,
             Error::BadClientData => StatusCode::BAD_REQUEST,
-            Error::NotFound => StatusCode::NOT_FOUND
+            Error::NotFound => StatusCode::NOT_FOUND,
         }
     }
 }
@@ -59,7 +63,7 @@ async fn get_txn_input(txn_hash: &String) -> Result<String> {
         txn_hash
     ))
     .await?;
-    
+
     let res = res.text().await?;
     let res: Transaction = serde_json::from_str(&res)?;
 
@@ -77,7 +81,7 @@ fn get_method_full_string(method: &AbiMethod) -> Result<String> {
 }
 
 async fn find_abi_method_by_txn_input(input: &str, methods: &Vec<AbiMethod>) -> Result<AbiMethod> {
-    if  input.len() >= 10 {
+    if input.len() >= 10 {
         for method in methods {
             let hex = get_hex(&get_method_full_string(method)?)?;
             if input[2..10].eq(&hex[..8]) {
@@ -99,25 +103,14 @@ fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<usize> 
     let start = contract.find(&format!("function {}", method.name));
     let start = match start {
         Some(v) => v,
-        None => {
-            return Err(Error::NotFound)
-        }
+        None => return Err(Error::NotFound),
     };
     let line_number = find_line_number_in_contract(contract, start);
     Ok(line_number)
 }
 
 fn find_line_number_in_contract(contract: &str, index: usize) -> usize {
-    let mut n = 0;
-    for (i, c) in contract.chars().enumerate() {
-        if i >= index {
-            break;
-        }
-        if c == '\n' {
-            n += 1;
-        }
-    }
-    n
+    contract[..index].chars().filter(|x| *x == '\n').count()
 }
 
 pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
