@@ -100,7 +100,9 @@ fn get_hex(input: &String) -> Result<String> {
 }
 
 fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<usize> {
-    let start = contract.find(&format!("function {}", method.name)).ok_or(Error::NotFound)?;
+    let start = contract
+        .find(&format!("function {}", method.name))
+        .ok_or(Error::NotFound)?;
     let line_number = find_line_number_in_contract(contract, start);
     Ok(line_number)
 }
