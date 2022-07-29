@@ -20,6 +20,15 @@ mod tests {
         )
     }
 
+    async fn start_test(data: &Request) -> actix_web::dev::ServiceResponse {
+        let app = test::init_service(App::new().route("/", web::post().to(index))).await;
+        let req = test::TestRequest::post()
+            .uri("/")
+            .set_json(&data)
+            .to_request();
+        test::call_service(&app, req).await
+    }
+
     #[actix_web::test]
     async fn simple_empty_request_test() {
         let app = test::init_service(App::new().route("/", web::post().to(index))).await;
@@ -35,12 +44,7 @@ mod tests {
             "0x8e9624a11380ca4eeed2d16c2d4bd63d595b344988bc5864a1210ad95f4da0f0",
         );
 
-        let app = test::init_service(App::new().route("/", web::post().to(index))).await;
-        let req = test::TestRequest::post()
-            .uri("/")
-            .set_json(&data)
-            .to_request();
-        let resp = test::call_service(&app, req).await;
+        let resp = start_test(&data).await;
 
         assert!(resp.status().is_client_error());
     }
@@ -52,12 +56,7 @@ mod tests {
             "0x7b7e9c40f73ec6aa0b14ef61b485d7d41a9b2e70befed0b03face3bf3412c57e",
         );
 
-        let app = test::init_service(App::new().route("/", web::post().to(index))).await;
-        let req = test::TestRequest::post()
-            .uri("/")
-            .set_json(&data)
-            .to_request();
-        let resp = test::call_service(&app, req).await;
+        let resp = start_test(&data).await;
 
         assert!(resp.status().is_success());
 
@@ -73,12 +72,7 @@ mod tests {
             "0x7c58d31f4a66afbd36e63c84795b1a5ce584d7f3c76710d16e0bb96319f95368",
         );
 
-        let app = test::init_service(App::new().route("/", web::post().to(index))).await;
-        let req = test::TestRequest::post()
-            .uri("/")
-            .set_json(&data)
-            .to_request();
-        let resp = test::call_service(&app, req).await;
+        let resp = start_test(&data).await;
 
         assert!(resp.status().is_success());
 
