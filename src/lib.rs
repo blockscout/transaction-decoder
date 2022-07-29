@@ -99,7 +99,7 @@ fn get_hex(input: &String) -> Result<String> {
     Ok(format!("{:x}", res))
 }
 
-fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<usize> {
+fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<u32> {
     let start = contract
         .find(&format!("function {}", method.name))
         .ok_or(Error::NotFound)?;
@@ -107,14 +107,14 @@ fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<usize> 
     Ok(line_number)
 }
 
-fn find_line_number_in_contract(contract: &str, index: usize) -> usize {
-    contract[..index].chars().filter(|x| *x == '\n').count()
+fn find_line_number_in_contract(contract: &str, index: usize) -> u32 {
+    (contract[..index].chars().filter(|x| *x == '\n').count() + 1) as u32
 }
 
 pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.txn).await?;
     let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
-    let line_number = find_method_in_contract(&req.contract, &method)? as u32 + 1;
+    let line_number = find_method_in_contract(&req.contract, &method)?;
     let response = Response {
         method,
         line_number,
