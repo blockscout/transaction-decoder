@@ -1,0 +1,21 @@
+{
+    "method": {
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "nfts",
+                "type": "address[]",
+                "internalType": "address[]"
+            },
+            {
+                "indexed": false,
+                "name": "tokenIds",
+                "type": "uint256[][]",
+                "internalType": "uint256[][]"
+            }
+        ],
+        "type": "function",
+        "name": "lock"
+    },
+    "line_number": 56
+}

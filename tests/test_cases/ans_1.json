@@ -1,0 +1,21 @@
+{
+    "method": {
+        "inputs": [
+            {
+                "indexed": false,
+                "name": "to",
+                "type": "address",
+                "internalType": "address"
+            },
+            {
+                "indexed": false,
+                "name": "amount",
+                "type": "uint256",
+                "internalType": "uint256"
+            }
+        ],
+        "type": "function",
+        "name": "transfer"
+    },
+    "line_number": 322
+}

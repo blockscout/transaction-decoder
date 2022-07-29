@@ -20,7 +20,7 @@ pub struct AbiArg {
     pub internal_type: String,
 }
 
-#[derive(Deserialize, Debug)]
+#[derive(Deserialize, Debug, Serialize)]
 pub struct Request {
     pub txn: String,
     pub abi: Vec<AbiMethod>,
@@ -37,7 +37,7 @@ pub struct TransactionInput {
     pub input: String,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize)]
 pub struct Response {
     pub method: AbiMethod,
     pub line_number: u32,
