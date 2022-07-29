@@ -4,6 +4,7 @@ use actix_web::{
     web, HttpResponse, Responder,
 };
 use derive_more::{Display, Error};
+use regex::Regex;
 use sha3::{Digest, Keccak256};
 
 pub mod structs;
@@ -64,26 +65,15 @@ async fn get_txn_input(txn_hash: &String) -> Result<String> {
     ))
     .await?;
 
-    let res = res.text().await?;
-    let res: Transaction = serde_json::from_str(&res)?;
+    let res: Transaction = res.json().await?;
 
     Ok(res.result.input)
-}
-
-fn get_method_full_string(method: &AbiMethod) -> Result<String> {
-    let v = method.inputs.clone();
-    let args = v
-        .into_iter()
-        .map(|x| x.arg_type)
-        .collect::<Vec<_>>()
-        .join(",");
-    Ok(format!("{}({})", method.name, args))
 }
 
 async fn find_abi_method_by_txn_input(input: &str, methods: &Vec<AbiMethod>) -> Result<AbiMethod> {
     if input.len() >= 10 {
         for method in methods {
-            let hex = get_hex(&get_method_full_string(method)?)?;
+            let hex = get_hex(&method.function_signature())?;
             if input[2..10].eq(&hex[..8]) {
                 return Ok(method.clone());
             }
@@ -100,15 +90,24 @@ fn get_hex(input: &String) -> Result<String> {
 }
 
 fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<u32> {
-    let start = contract
-        .find(&format!("function {}", method.name))
-        .ok_or(Error::NotFound)?;
-    let line_number = find_line_number_in_contract(contract, start);
-    Ok(line_number)
-}
+    let signature = method.function();
+    let mut start = 0;
+    let re = Regex::new(r"(calldata|memory|storage| |\n)").unwrap();
 
-fn find_line_number_in_contract(contract: &str, index: usize) -> u32 {
-    (contract[..index].chars().filter(|x| *x == '\n').count() + 1) as u32
+    loop {
+        start = contract[start..]
+            .find(&format!("function {}", method.name))
+            .ok_or(Error::BadClientData)?;
+        let end = contract[start..].find(")").ok_or(Error::NotFound)? + start;
+
+        if re.replace_all(&contract[(start + "function ".len())..end + 1], "") == signature {
+            break;
+        }
+        start = end;
+    }
+
+    let line_number = (contract[..start].chars().filter(|x| *x == '\n').count() + 1) as u32;
+    Ok(line_number)
 }
 
 pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {

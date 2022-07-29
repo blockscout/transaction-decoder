@@ -9,6 +9,28 @@ pub struct AbiMethod {
     pub name: String,
 }
 
+impl AbiMethod {
+    pub fn function(&self) -> String {
+        let v: Vec<String> = self
+            .inputs
+            .iter()
+            .map(|x| format!("{}{}", x.arg_type, x.name))
+            .collect();
+        format!("{}({})", self.name, v.join(","))
+    }
+
+    pub fn function_signature(&self) -> String {
+        let args = self
+            .inputs
+            .clone()
+            .into_iter()
+            .map(|x| x.arg_type)
+            .collect::<Vec<_>>()
+            .join(",");
+        format!("{}({})", self.name, args)
+    }
+}
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AbiArg {
     #[serde(default)]
@@ -34,6 +56,7 @@ pub struct Transaction {
 
 #[derive(Deserialize, Debug)]
 pub struct TransactionInput {
+    //#[serde(with = "hex::serde")]
     pub input: String,
 }
 
