@@ -3,11 +3,11 @@ use std::{fs, str::FromStr};
 use transaction_decoder::{index, AbiMethod, Bytes, Request};
 
 fn read_test_case(num: u32, txn: &str) -> (Request, String) {
-    let contract = fs::read_to_string(format!("tests/test_cases/contract_{}.txt", num)).unwrap();
-    let abi = fs::read_to_string(format!("tests/test_cases/abi_{}.json", num)).unwrap();
+    let contract = fs::read_to_string(format!("tests/test_cases/contract_{}/contract.sol", num)).unwrap();
+    let abi = fs::read_to_string(format!("tests/test_cases/contract_{}/abi.json", num)).unwrap();
     let abi: Vec<AbiMethod> = serde_json::from_str(&abi).unwrap();
     let txn = Bytes::from_str(txn).expect("Invalid transaction hash");
-    let ans = fs::read_to_string(format!("tests/test_cases/ans_{}.json", num)).unwrap();
+    let ans = fs::read_to_string(format!("tests/test_cases/contract_{}/ans.json", num)).unwrap();
 
     (
         Request {
