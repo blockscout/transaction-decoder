@@ -9,10 +9,7 @@ fn read_test_case(num: u32, txn: &str) -> (Request, String) {
     let ans = fs::read_to_string(format!("tests/test_cases/contract_{}/ans.json", num)).unwrap();
 
     (
-        Request {
-            abi,
-            tx_hash: txn,
-        },
+        Request { abi, tx_hash: txn },
         ans.replace(" ", "").replace("\n", ""),
     )
 }

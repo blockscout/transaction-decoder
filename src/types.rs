@@ -2,6 +2,8 @@ use crate::Bytes;
 use serde::{Deserialize, Serialize};
 use sha3::{Digest, Keccak256};
 
+use ethabi::Contract;
+
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AbiMethod {
     pub inputs: Vec<AbiArg>,
@@ -52,7 +54,10 @@ pub struct Request {
 
 #[derive(Deserialize, Debug)]
 pub struct Transaction {
-    pub result: TransactionInput,
+    // pub result: TransactionInput,
+    pub message: String,
+    pub result: Option<TransactionInput>,
+    pub status: usize,
 }
 
 #[derive(Deserialize, Debug)]

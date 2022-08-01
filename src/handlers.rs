@@ -1,58 +1,31 @@
-use actix_web::{
-    error,
-    http::{header::ContentType, StatusCode},
-    web, HttpResponse, Responder,
-};
-use derive_more::{Display, Error};
+use actix_web::{error, http::StatusCode, web, Responder};
+use anyhow::anyhow;
 
 use crate::bytes::Bytes;
+use thiserror::Error;
 
 use crate::{AbiMethod, Request, Response, Transaction};
 
 type Result<T> = std::result::Result<T, Error>;
 
-#[derive(Debug, Display, Error)]
+#[derive(Debug, Error)]
 pub enum Error {
-    #[display(fmt = "internal error")]
-    Internal,
-
-    #[display(fmt = "bad request")]
-    BadClientData,
-
-    #[display(fmt = "not found")]
+    #[error("not found")]
     NotFound,
-}
 
-impl From<reqwest::Error> for Error {
-    fn from(_: reqwest::Error) -> Self {
-        Error::NotFound
-    }
-}
+    #[error("Error while getting tx info: {0}")]
+    GetTxInfo(String),
 
-impl From<serde_json::Error> for Error {
-    fn from(_: serde_json::Error) -> Self {
-        Error::BadClientData
-    }
-}
-
-impl From<actix_web::Error> for Error {
-    fn from(_: actix_web::Error) -> Self {
-        Error::Internal
-    }
+    #[error("{0}")]
+    Other(#[from] anyhow::Error),
 }
 
 impl error::ResponseError for Error {
-    fn error_response(&self) -> HttpResponse {
-        HttpResponse::build(self.status_code())
-            .insert_header(ContentType::html())
-            .body(self.to_string())
-    }
-
     fn status_code(&self) -> StatusCode {
         match *self {
-            Error::Internal => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::BadClientData => StatusCode::BAD_REQUEST,
-            Error::NotFound => StatusCode::NOT_FOUND,
+            Error::NotFound => StatusCode::BAD_REQUEST,
+            Error::GetTxInfo(_) => StatusCode::BAD_REQUEST,
+            Error::Other(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }
@@ -62,11 +35,18 @@ async fn get_txn_input(txn_hash: &Bytes) -> Result<Bytes> {
         "https://blockscout.com/eth/mainnet/api?module=transaction&action=gettxinfo&txhash={}",
         txn_hash
     ))
-    .await?;
+    .await
+    .map_err(|err| anyhow!(err))?;
 
-    let res: Transaction = res.json().await?;
+    let res: Transaction = res.json().await.map_err(|err| anyhow!(err))?;
 
-    Ok(res.result.input)
+    if res.status != 1 {
+        return Err(Error::GetTxInfo(res.message));
+    }
+
+    res.result
+        .map(|result| result.input)
+        .ok_or_else(|| Error::Other(anyhow!("Missing input block")))
 }
 
 async fn find_abi_method_by_txn_input(
@@ -90,8 +70,6 @@ async fn find_abi_method_by_txn_input(
 pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash).await?;
     let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
-    let response = Response {
-        method,
-    };
+    let response = Response { method };
     Ok(web::Json(response))
 }
