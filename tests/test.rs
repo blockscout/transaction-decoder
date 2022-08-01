@@ -3,7 +3,7 @@ mod tests {
     use std::fs;
     use transaction_decoder::{
         index,
-        structs::{AbiMethod, Request},
+        types::{AbiMethod, Request},
     };
 
     fn read_test_case(num: u32, txn: &str) -> (Request, String) {

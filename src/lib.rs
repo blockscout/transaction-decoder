@@ -1,10 +1,10 @@
 mod bytes;
 mod handlers;
-mod structs;
+mod types;
 
 use crate::{
     bytes::Bytes,
-    structs::{AbiMethod, Request, Response, Transaction},
+    types::{AbiMethod, Request, Response, Transaction},
 };
 
 pub use handlers::index;

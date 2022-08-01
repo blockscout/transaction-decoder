@@ -43,13 +43,13 @@ impl AbiMethod {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
+#[serde(rename_all = "camelCase")]
 pub struct AbiArg {
     #[serde(default)]
     pub indexed: bool,
     pub name: String,
     #[serde(rename = "type")]
     pub arg_type: String,
-    #[serde(rename = "internalType")]
     pub internal_type: String,
 }
 
