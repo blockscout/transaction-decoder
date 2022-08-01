@@ -2,11 +2,12 @@ mod bytes;
 mod handlers;
 mod types;
 
-use crate::{
-    bytes::Bytes,
-    types::{AbiMethod, Request, Response, Transaction},
-};
+use crate::types::{Response, Transaction};
 
+pub use crate::{
+    bytes::Bytes,
+    types::{AbiMethod, Request},
+};
 pub use handlers::index;
 
 use actix_web::{web, App, HttpServer};
