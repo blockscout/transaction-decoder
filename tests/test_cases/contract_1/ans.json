@@ -16,6 +16,5 @@
         ],
         "type": "function",
         "name": "transfer"
-    },
-    "line_number": 322
+    }
 }

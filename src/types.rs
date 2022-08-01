@@ -12,15 +12,6 @@ pub struct AbiMethod {
 }
 
 impl AbiMethod {
-    pub fn function(&self) -> String {
-        let v: Vec<String> = self
-            .inputs
-            .iter()
-            .map(|x| format!("{}{}", x.arg_type, x.name))
-            .collect();
-        format!("{}({})", self.name, v.join(","))
-    }
-
     pub fn selector(&self) -> [u8; 4] {
         let mut hasher = Keccak256::new();
         hasher.update(self.signature().as_bytes());
@@ -57,7 +48,6 @@ pub struct AbiArg {
 pub struct Request {
     pub tx_hash: Bytes,
     pub abi: Vec<AbiMethod>,
-    pub contract: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -73,5 +63,4 @@ pub struct TransactionInput {
 #[derive(Serialize, Deserialize)]
 pub struct Response {
     pub method: AbiMethod,
-    pub line_number: u32,
 }
