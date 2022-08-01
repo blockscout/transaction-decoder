@@ -15,7 +15,11 @@ mod tests {
         let ans = fs::read_to_string(format!("tests/test_cases/ans_{}.json", num)).unwrap();
 
         (
-            Request { abi, contract, txn },
+            Request {
+                abi,
+                contract,
+                tx_hash: txn,
+            },
             ans.replace(" ", "").replace("\n", ""),
         )
     }

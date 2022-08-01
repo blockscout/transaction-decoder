@@ -1,4 +1,6 @@
+use crate::Bytes;
 use serde::{Deserialize, Serialize};
+use sha3::{Digest, Keccak256};
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AbiMethod {
@@ -19,12 +21,21 @@ impl AbiMethod {
         format!("{}({})", self.name, v.join(","))
     }
 
-    pub fn function_signature(&self) -> String {
+    pub fn selector(&self) -> [u8; 4] {
+        let mut hasher = Keccak256::new();
+        hasher.update(self.signature().as_bytes());
+        let res = hasher.finalize();
+
+        let mut ans = [0u8; 4];
+        ans.copy_from_slice(&res[0..4]);
+        ans
+    }
+
+    fn signature(&self) -> String {
         let args = self
             .inputs
-            .clone()
-            .into_iter()
-            .map(|x| x.arg_type)
+            .iter()
+            .map(|x| x.arg_type.clone())
             .collect::<Vec<_>>()
             .join(",");
         format!("{}({})", self.name, args)
@@ -44,7 +55,7 @@ pub struct AbiArg {
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Request {
-    pub txn: String,
+    pub tx_hash: Bytes,
     pub abi: Vec<AbiMethod>,
     pub contract: String,
 }
@@ -56,8 +67,7 @@ pub struct Transaction {
 
 #[derive(Deserialize, Debug)]
 pub struct TransactionInput {
-    //#[serde(with = "hex::serde")]
-    pub input: String,
+    pub input: Bytes,
 }
 
 #[derive(Serialize, Deserialize)]

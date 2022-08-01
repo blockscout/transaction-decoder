@@ -5,9 +5,12 @@ use actix_web::{
 };
 use derive_more::{Display, Error};
 use regex::Regex;
-use sha3::{Digest, Keccak256};
 
+mod bytes;
 pub mod structs;
+
+use crate::bytes::Bytes;
+
 use crate::structs::{AbiMethod, Request, Response, Transaction};
 
 type Result<T> = std::result::Result<T, Error>;
@@ -58,7 +61,7 @@ impl error::ResponseError for Error {
     }
 }
 
-async fn get_txn_input(txn_hash: &String) -> Result<String> {
+async fn get_txn_input(txn_hash: &Bytes) -> Result<Bytes> {
     let res = reqwest::get(format!(
         "https://blockscout.com/eth/mainnet/api?module=transaction&action=gettxinfo&txhash={}",
         txn_hash
@@ -70,23 +73,22 @@ async fn get_txn_input(txn_hash: &String) -> Result<String> {
     Ok(res.result.input)
 }
 
-async fn find_abi_method_by_txn_input(input: &str, methods: &Vec<AbiMethod>) -> Result<AbiMethod> {
-    if input.len() >= 10 {
-        for method in methods {
-            let hex = get_hex(&method.function_signature())?;
-            if input[2..10].eq(&hex[..8]) {
-                return Ok(method.clone());
-            }
+async fn find_abi_method_by_txn_input(
+    input: &Bytes,
+    methods: &Vec<AbiMethod>,
+) -> Result<AbiMethod> {
+    if input.0.len() < 4 {
+        return Err(Error::NotFound);
+    }
+
+    for method in methods {
+        let hex = method.selector();
+        if &input.0[0..4] == hex.as_slice() {
+            return Ok(method.clone());
         }
     }
-    Err(Error::NotFound)
-}
 
-fn get_hex(input: &String) -> Result<String> {
-    let mut hasher = Keccak256::new();
-    hasher.update(input.as_bytes());
-    let res = hasher.finalize();
-    Ok(format!("{:x}", res))
+    Err(Error::NotFound)
 }
 
 fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<u32> {
@@ -111,7 +113,7 @@ fn find_method_in_contract(contract: &str, method: &AbiMethod) -> Result<u32> {
 }
 
 pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
-    let txn_input = get_txn_input(&req.txn).await?;
+    let txn_input = get_txn_input(&req.tx_hash).await?;
     let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
     let line_number = find_method_in_contract(&req.contract, &method)?;
     let response = Response {
