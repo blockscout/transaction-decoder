@@ -1,10 +1,11 @@
 use actix_web::{error, http::StatusCode, web, Responder};
 use anyhow::anyhow;
+use ethabi::{Contract, Function};
 
 use crate::bytes::Bytes;
 use thiserror::Error;
 
-use crate::{AbiMethod, Request, Response, Transaction};
+use crate::{Request, Response, Transaction};
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -53,18 +54,15 @@ async fn get_txn_input(txn_hash: &Bytes, network: &String) -> Result<Bytes> {
         .ok_or_else(|| Error::Other(anyhow!("Missing input block")))
 }
 
-async fn find_abi_method_by_txn_input(
-    input: &Bytes,
-    methods: &Vec<AbiMethod>,
-) -> Result<AbiMethod> {
+async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<Function> {
     if input.0.len() < 4 {
         return Err(Error::NotFound);
     }
 
-    for method in methods {
-        let hex = method.selector();
+    for function in &abi.functions {
+        let hex = function.1[0].short_signature();
         if &input.0[0..4] == hex.as_slice() {
-            return Ok(method.clone());
+            return Ok(function.1[0].clone());
         }
     }
 
@@ -75,5 +73,6 @@ pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
     let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
     let response = Response { method };
+
     Ok(web::Json(response))
 }

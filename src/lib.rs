@@ -4,10 +4,7 @@ mod types;
 
 use crate::types::{Response, Transaction};
 
-pub use crate::{
-    bytes::Bytes,
-    types::{AbiMethod, Request},
-};
+pub use crate::{bytes::Bytes, types::Request};
 pub use handlers::index;
 
 use actix_web::{web, App, HttpServer};
