@@ -38,6 +38,10 @@ async fn get_txn_input(txn_hash: &Bytes, network: &String) -> Result<Bytes> {
     .await
     .map_err(|err| anyhow!(err))?;
 
+    if res.status() == StatusCode::NOT_FOUND {
+        return Err(Error::NotFound);
+    }
+
     let res: Transaction = res.json().await.map_err(|err| anyhow!(err))?;
 
     if res.status != "1" {
