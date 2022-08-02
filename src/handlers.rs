@@ -30,17 +30,17 @@ impl error::ResponseError for Error {
     }
 }
 
-async fn get_txn_input(txn_hash: &Bytes) -> Result<Bytes> {
+async fn get_txn_input(txn_hash: &Bytes, network: &String) -> Result<Bytes> {
     let res = reqwest::get(format!(
-        "https://blockscout.com/eth/mainnet/api?module=transaction&action=gettxinfo&txhash={}",
-        txn_hash
+        "https://blockscout.com/{}/api?module=transaction&action=gettxinfo&txhash={}",
+        network, txn_hash
     ))
     .await
     .map_err(|err| anyhow!(err))?;
 
     let res: Transaction = res.json().await.map_err(|err| anyhow!(err))?;
 
-    if res.status != 1 {
+    if res.status != "1" {
         return Err(Error::GetTxInfo(res.message));
     }
 
@@ -68,7 +68,7 @@ async fn find_abi_method_by_txn_input(
 }
 
 pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
-    let txn_input = get_txn_input(&req.tx_hash).await?;
+    let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
     let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
     let response = Response { method };
     Ok(web::Json(response))

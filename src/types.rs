@@ -50,6 +50,7 @@ pub struct AbiArg {
 pub struct Request {
     pub tx_hash: Bytes,
     pub abi: Vec<AbiMethod>,
+    pub network: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -57,7 +58,7 @@ pub struct Transaction {
     // pub result: TransactionInput,
     pub message: String,
     pub result: Option<TransactionInput>,
-    pub status: usize,
+    pub status: String,
 }
 
 #[derive(Deserialize, Debug)]
