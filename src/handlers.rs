@@ -76,7 +76,7 @@ async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<O
     Err(Error::NotFound)
 }
 
-pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
+pub async fn decode(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
     let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
     let response = match &method {

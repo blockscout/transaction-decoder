@@ -1,7 +1,7 @@
 use actix_web::{test, web, App};
 use ethabi::Contract;
 use std::{fs, str::FromStr};
-use transaction_decoder::{index, Bytes, Request};
+use transaction_decoder::{decode, Bytes, Request};
 
 fn read_test_case(num: u32, txn: &str, network: String) -> (Request, String) {
     let abi = fs::read_to_string(format!("tests/test_cases/contract_{}/abi.json", num)).unwrap();
@@ -20,7 +20,7 @@ fn read_test_case(num: u32, txn: &str, network: String) -> (Request, String) {
 }
 
 async fn start_test(data: &Request) -> actix_web::dev::ServiceResponse {
-    let app = test::init_service(App::new().route("/", web::post().to(index))).await;
+    let app = test::init_service(App::new().route("/", web::post().to(decode))).await;
     let req = test::TestRequest::post()
         .uri("/")
         .set_json(&data)
@@ -30,7 +30,7 @@ async fn start_test(data: &Request) -> actix_web::dev::ServiceResponse {
 
 #[actix_web::test]
 async fn simple_empty_request_test() {
-    let app = test::init_service(App::new().route("/", web::post().to(index))).await;
+    let app = test::init_service(App::new().route("/", web::post().to(decode))).await;
     let req = test::TestRequest::post().uri("/").to_request();
     let resp = test::call_service(&app, req).await;
     assert!(resp.status().is_client_error());
