@@ -50,7 +50,7 @@ async fn wrong_transaction_test() {
 }
 
 #[actix_web::test]
-async fn test_1() {
+async fn simple_transfer_test() {
     let (data, ans) = read_test_case(
         1,
         "0x7b7e9c40f73ec6aa0b14ef61b485d7d41a9b2e70befed0b03face3bf3412c57e",
@@ -67,7 +67,7 @@ async fn test_1() {
 }
 
 #[actix_web::test]
-async fn test_2() {
+async fn random_contract_test() {
     let (data, ans) = read_test_case(
         2,
         "0x7c58d31f4a66afbd36e63c84795b1a5ce584d7f3c76710d16e0bb96319f95368",
@@ -84,7 +84,7 @@ async fn test_2() {
 }
 
 #[actix_web::test]
-async fn test_3() {
+async fn fallback_test() {
     let (data, ans) = read_test_case(
         3,
         "0x35ba6e645cf20e91ac96e7ffc882df16b63a7454ce879d9146924284dc32c847",
