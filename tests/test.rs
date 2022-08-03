@@ -84,6 +84,23 @@ async fn test_2() {
 }
 
 #[actix_web::test]
+async fn test_3() {
+    let (data, ans) = read_test_case(
+        3,
+        "0x35ba6e645cf20e91ac96e7ffc882df16b63a7454ce879d9146924284dc32c847",
+        "eth/mainnet".to_string(),
+    );
+
+    let resp = start_test(&data).await;
+
+    assert!(resp.status().is_success());
+
+    let body = test::read_body(resp).await;
+
+    assert_eq!(body, ans);
+}
+
+#[actix_web::test]
 async fn non_existent_network_test() {
     let (data, _) = read_test_case(
         2,

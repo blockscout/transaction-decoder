@@ -24,5 +24,6 @@ pub struct TransactionInput {
 
 #[derive(Serialize, Deserialize)]
 pub struct Response {
-    pub method: Function,
+    pub method: Option<Function>,
+    pub is_fallback: bool,
 }

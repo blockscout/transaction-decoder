@@ -54,16 +54,23 @@ async fn get_txn_input(txn_hash: &Bytes, network: &String) -> Result<Bytes> {
         .ok_or_else(|| Error::Other(anyhow!("Missing input block")))
 }
 
-async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<Function> {
+async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<Option<Function>> {
     if input.0.len() < 4 {
+        if abi.fallback {
+            return Ok(None);
+        }
         return Err(Error::NotFound);
     }
 
     for function in &abi.functions {
         let hex = function.1[0].short_signature();
         if &input.0[0..4] == hex.as_slice() {
-            return Ok(function.1[0].clone());
+            return Ok(Some(function.1[0].clone()));
         }
+    }
+
+    if abi.fallback {
+        return Ok(None);
     }
 
     Err(Error::NotFound)
@@ -72,7 +79,16 @@ async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<F
 pub async fn index(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
     let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
-    let response = Response { method };
+    let response = match &method {
+        Some(_) => Response {
+            method,
+            is_fallback: false,
+        },
+        None => Response {
+            method,
+            is_fallback: true,
+        },
+    };
 
     Ok(web::Json(response))
 }

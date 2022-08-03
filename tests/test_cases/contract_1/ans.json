@@ -21,5 +21,6 @@
             }
         ],
         "stateMutability": "nonpayable"
-    }
+    },
+    "is_fallback": false
 }
