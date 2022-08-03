@@ -1,11 +1,11 @@
-use crate::Bytes;
+use crate::DisplayBytes;
 use serde::{Deserialize, Serialize};
 
 use ethabi::{Contract, Function};
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Request {
-    pub tx_hash: Bytes,
+    pub tx_hash: DisplayBytes,
     pub abi: Contract,
     pub network: String,
 }
@@ -19,7 +19,7 @@ pub struct Transaction {
 
 #[derive(Deserialize, Debug)]
 pub struct TransactionInput {
-    pub input: Bytes,
+    pub input: DisplayBytes,
 }
 
 #[derive(Serialize, Deserialize)]

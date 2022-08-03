@@ -2,7 +2,7 @@ use actix_web::{error, http::StatusCode, web, Responder};
 use anyhow::anyhow;
 use ethabi::{Contract, Function};
 
-use crate::bytes::Bytes;
+use crate::DisplayBytes;
 use thiserror::Error;
 
 use crate::{Request, Response, Transaction};
@@ -31,7 +31,7 @@ impl error::ResponseError for Error {
     }
 }
 
-async fn get_txn_input(txn_hash: &Bytes, network: &String) -> Result<Bytes> {
+async fn get_txn_input(txn_hash: &DisplayBytes, network: &String) -> Result<DisplayBytes> {
     let res = reqwest::get(format!(
         "https://blockscout.com/{}/api?module=transaction&action=gettxinfo&txhash={}",
         network, txn_hash
@@ -54,8 +54,11 @@ async fn get_txn_input(txn_hash: &Bytes, network: &String) -> Result<Bytes> {
         .ok_or_else(|| Error::Other(anyhow!("Missing input block")))
 }
 
-async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<Option<Function>> {
-    if input.0.len() < 4 {
+async fn find_abi_method_by_txn_input(
+    input: &bytes::Bytes,
+    abi: &Contract,
+) -> Result<Option<Function>> {
+    if input.len() < 4 {
         if abi.fallback {
             return Ok(None);
         }
@@ -64,7 +67,7 @@ async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<O
 
     for function in &abi.functions {
         let hex = function.1[0].short_signature();
-        if &input.0[0..4] == hex.as_slice() {
+        if &input[0..4] == hex.as_slice() {
             return Ok(Some(function.1[0].clone()));
         }
     }
@@ -78,7 +81,7 @@ async fn find_abi_method_by_txn_input(input: &Bytes, abi: &Contract) -> Result<O
 
 pub async fn decode(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
-    let method = find_abi_method_by_txn_input(&txn_input, &req.abi).await?;
+    let method = find_abi_method_by_txn_input(&txn_input.0, &req.abi).await?;
     let response = match &method {
         Some(_) => Response {
             method,
