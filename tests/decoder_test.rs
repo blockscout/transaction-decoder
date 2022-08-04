@@ -1,6 +1,9 @@
 use actix_web::{test, web, App};
 use ethabi::Contract;
-use std::{fs, str::FromStr};
+use std::{
+    fs,
+    str::{from_utf8, FromStr},
+};
 use transaction_decoder::{decode, DisplayBytes, Request};
 
 fn read_test_case(num: u32, txn: &str, network: String) -> (Request, String) {
@@ -124,4 +127,21 @@ async fn wrong_network_test() {
     let resp = start_test(&data).await;
 
     assert!(resp.status().is_client_error());
+}
+
+#[actix_web::test]
+async fn function_overload_test() {
+    let (data, ans) = read_test_case(
+        4,
+        "0xca5d8ff91cba269df4b02852004ba2d2e4b2039342c484b4a78d87300a5c242b",
+        "poa/sokol".to_string(),
+    );
+
+    let resp = start_test(&data).await;
+
+    assert!(resp.status().is_success());
+
+    let body = test::read_body(resp).await;
+
+    assert_eq!(body, ans);
 }

@@ -40,7 +40,9 @@ async fn get_txn_input(txn_hash: &DisplayBytes, network: &String) -> Result<Disp
     .map_err(|err| anyhow!(err))?;
 
     if res.status() == StatusCode::NOT_FOUND {
-        return Err(Error::NotFound);
+        return Err(Error::GetTxInfo(
+            "with some message describing that network field is invalid".to_string(),
+        ));
     }
 
     let res: Transaction = res.json().await.map_err(|err| anyhow!(err))?;
@@ -64,11 +66,12 @@ async fn find_abi_method_by_txn_input(
         }
         return Err(Error::NotFound);
     }
-
     for function in &abi.functions {
-        let hex = function.1[0].short_signature();
-        if &input[0..4] == hex.as_slice() {
-            return Ok(Some(function.1[0].clone()));
+        for f in function.1 {
+            let hex = f.short_signature();
+            if &input[0..4] == hex.as_slice() {
+                return Ok(Some(f.clone()));
+            }
         }
     }
 
@@ -82,16 +85,6 @@ async fn find_abi_method_by_txn_input(
 pub async fn decode(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
     let method = find_abi_method_by_txn_input(&txn_input.0, &req.abi).await?;
-    let response = match &method {
-        Some(_) => Response {
-            method,
-            is_fallback: false,
-        },
-        None => Response {
-            method,
-            is_fallback: true,
-        },
-    };
-
+    let response = Response { method };
     Ok(web::Json(response))
 }
