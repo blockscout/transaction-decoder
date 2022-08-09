@@ -21,5 +21,13 @@
             }
         ],
         "stateMutability": "nonpayable"
-    }
+    },
+    "decoded_inputs": [
+        {
+            "Address": "0xbe9dc33cf6a8f2a89689c9204613307dfc16d104"
+        },
+        {
+            "Uint": "0x49616e2bb034c924"
+        }
+    ]
 }

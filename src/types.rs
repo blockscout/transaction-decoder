@@ -1,7 +1,7 @@
 use crate::DisplayBytes;
 use serde::{Deserialize, Serialize};
 
-use ethabi::{Contract, Function};
+use ethabi::{Contract, Function, Token};
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct Request {
@@ -25,4 +25,5 @@ pub struct TransactionInput {
 #[derive(Serialize, Deserialize)]
 pub struct Response {
     pub method: Option<Function>,
+    pub decoded_inputs: Option<Vec<Token>>,
 }

@@ -1,0 +1,50 @@
+{
+    "method": {
+        "name": "sam",
+        "inputs": [
+            {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "pure"
+    },
+    "decoded_inputs": [
+        {
+            "Bytes": [
+                100,
+                97,
+                118,
+                101
+            ]
+        },
+        {
+            "Bool": true
+        },
+        {
+            "Array": [
+                {
+                    "Uint": "0x1"
+                },
+                {
+                    "Uint": "0x2"
+                },
+                {
+                    "Uint": "0x3"
+                }
+            ]
+        }
+    ]
+}

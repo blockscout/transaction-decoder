@@ -1,0 +1,64 @@
+{
+    "method": {
+        "name": "some",
+        "inputs": [
+            {
+                "internalType": "struct Foo.Kek[]",
+                "name": "a",
+                "type": "tuple[]",
+                "components": [
+                    {
+                        "type": "uint256"
+                    },
+                    {
+                        "type": "bytes"
+                    }
+                ]
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "payable"
+    },
+    "decoded_inputs": [
+        {
+            "Array": [
+                {
+                    "Tuple": [
+                        {
+                            "Uint": "0x2dddefa5d"
+                        },
+                        {
+                            "Bytes": [
+                                1,
+                                174,
+                                221,
+                                173,
+                                237,
+                                174,
+                                0,
+                                221
+                            ]
+                        }
+                    ]
+                },
+                {
+                    "Tuple": [
+                        {
+                            "Uint": "0xb32b4f6eb02"
+                        },
+                        {
+                            "Bytes": [
+                                18,
+                                49,
+                                36,
+                                18,
+                                49,
+                                36
+                            ]
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -16,5 +16,10 @@
             }
         ],
         "stateMutability": "view"
-    }
+    },
+    "decoded_inputs": [
+        {
+            "Uint": "0x2"
+        }
+    ]
 }
