@@ -40,9 +40,7 @@ async fn get_txn_input(txn_hash: &DisplayBytes, network: &String) -> Result<Disp
     .map_err(|err| anyhow!(err))?;
 
     if res.status() == StatusCode::NOT_FOUND {
-        return Err(Error::GetTxInfo(
-            "with some message describing that network field is invalid".to_string(),
-        ));
+        return Err(Error::GetTxInfo("Wrong network".to_string()));
     }
 
     let res: Transaction = res.json().await.map_err(|err| anyhow!(err))?;
