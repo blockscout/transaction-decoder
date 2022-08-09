@@ -151,5 +151,5 @@ async fn struct_decode_test() {
 
     let body = test::read_body(resp).await;
 
-    assert_eq!(body, ans);
+    assert_eq!(std::str::from_utf8(&body).unwrap().replace(" ", ""), ans);
 }
