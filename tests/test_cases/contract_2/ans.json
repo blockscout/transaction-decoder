@@ -1,0 +1,19 @@
+{
+    "method": {
+        "name": "lock",
+        "inputs": [
+            {
+                "internalType": "address[]",
+                "name": "nfts",
+                "type": "address[]"
+            },
+            {
+                "internalType": "uint256[][]",
+                "name": "tokenIds",
+                "type": "uint256[][]"
+            }
+        ],
+        "outputs": [],
+        "stateMutability": "nonpayable"
+    }
+}
