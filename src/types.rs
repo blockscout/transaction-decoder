@@ -66,38 +66,37 @@ impl ResponseDisplay for ParamType {
     }
 }
 
+fn format_bytes(bytes: &[u8]) -> String {
+    format!(
+        "0x{}",
+        bytes
+            .iter()
+            .map(|x| format!("{:x?}", x))
+            .collect::<Vec<String>>()
+            .join("")
+    )
+}
+
+fn format_tokens(tokens: &[Token], sep: &str) -> String {
+    tokens
+        .iter()
+        .map(|x| x.display())
+        .collect::<Vec<String>>()
+        .join(sep)
+}
+
 impl ResponseDisplay for Token {
     fn display(&self) -> String {
         match self {
             Token::String(s) => s.clone(),
             Token::Address(ad) => format!("{:?}", ad),
-            Token::FixedBytes(fb) => format!("{:?}", fb),
-            Token::Bytes(b) => format!(
-                "0x{}",
-                b.iter()
-                    .map(|x| format!("{:x?}", x))
-                    .collect::<Vec<String>>()
-                    .join("")
-            ),
-            Token::Int(n) => format!("{:?}", n),
-            Token::Uint(n) => format!("{:?}", n),
+            Token::Bytes(b) | Token::FixedBytes(b) => format_bytes(b),
+            Token::Int(n) | Token::Uint(n) => format!("{:?}", n),
             Token::Bool(b) => format!("{:?}", b),
-            Token::FixedArray(tokens) | Token::Array(tokens) => format!(
-                "[{}]",
-                tokens
-                    .iter()
-                    .map(|x| x.display())
-                    .collect::<Vec<String>>()
-                    .join(",")
-            ),
-            Token::Tuple(tokens) => format!(
-                "({})",
-                tokens
-                    .iter()
-                    .map(|x| x.display())
-                    .collect::<Vec<String>>()
-                    .join(",")
-            ),
+            Token::FixedArray(tokens) | Token::Array(tokens) => {
+                format!("[{}]", format_tokens(tokens, ""))
+            }
+            Token::Tuple(tokens) => format!("({})", format_tokens(tokens, ",")),
         }
     }
 }
