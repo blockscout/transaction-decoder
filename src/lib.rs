@@ -3,8 +3,10 @@ mod error;
 mod handlers;
 mod types;
 
-use crate::error::Error;
-use crate::types::{Response, ResponseMethod, Transaction};
+use crate::{
+    error::Error,
+    types::{Response, ResponseMethod, Transaction},
+};
 
 pub use crate::{bytes::Bytes as DisplayBytes, types::Request};
 pub use handlers::decode;
