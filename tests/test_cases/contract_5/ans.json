@@ -3,48 +3,23 @@
         "name": "sam",
         "inputs": [
             {
-                "internalType": "bytes",
                 "name": "",
-                "type": "bytes"
+                "internal_type": "bytes",
+                "kind": "bytes",
+                "value": "0x64617665"
             },
             {
-                "internalType": "bool",
                 "name": "",
-                "type": "bool"
+                "internal_type": "bool",
+                "kind": "bool",
+                "value": "true"
             },
             {
-                "internalType": "uint256[]",
                 "name": "",
-                "type": "uint256[]"
+                "internal_type": "uint256[]",
+                "kind": "uint256[]",
+                "value": "[1,2,3]"
             }
-        ],
-        "outputs": [],
-        "stateMutability": "pure"
-    },
-    "decoded_inputs": [
-        {
-            "Bytes": [
-                100,
-                97,
-                118,
-                101
-            ]
-        },
-        {
-            "Bool": true
-        },
-        {
-            "Array": [
-                {
-                    "Uint": "0x1"
-                },
-                {
-                    "Uint": "0x2"
-                },
-                {
-                    "Uint": "0x3"
-                }
-            ]
-        }
-    ]
+        ]
+    }
 }

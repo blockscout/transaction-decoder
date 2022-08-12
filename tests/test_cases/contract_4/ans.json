@@ -3,23 +3,11 @@
         "name": "retrieve",
         "inputs": [
             {
-                "internalType": "uint256",
                 "name": "key",
-                "type": "uint256"
+                "internal_type": "uint256",
+                "kind": "uint256",
+                "value": "2"
             }
-        ],
-        "outputs": [
-            {
-                "internalType": "uint256",
-                "name": "",
-                "type": "uint256"
-            }
-        ],
-        "stateMutability": "view"
-    },
-    "decoded_inputs": [
-        {
-            "Uint": "0x2"
-        }
-    ]
+        ]
+    }
 }

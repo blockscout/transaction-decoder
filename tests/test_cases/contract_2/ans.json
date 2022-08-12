@@ -3,62 +3,17 @@
         "name": "lock",
         "inputs": [
             {
-                "internalType": "address[]",
                 "name": "nfts",
-                "type": "address[]"
+                "internal_type": "address[]",
+                "kind": "address[]",
+                "value": "[0xef9c21e3ba31a74910fc7e7cb3fc814ad842ad6e, 0x3d74450d135f16b6fa20c1211c6faef93ee73d7c]"
             },
             {
-                "internalType": "uint256[][]",
                 "name": "tokenIds",
-                "type": "uint256[][]"
+                "internal_type": "uint256[][]",
+                "kind": "uint256[][]",
+                "value": "[[6251, 938, 5098], [2060, 3823, 3822, 245]]"
             }
-        ],
-        "outputs": [],
-        "stateMutability": "nonpayable"
-    },
-    "decoded_inputs": [
-        {
-            "Array": [
-                {
-                    "Address": "0xef9c21e3ba31a74910fc7e7cb3fc814ad842ad6e"
-                },
-                {
-                    "Address": "0x3d74450d135f16b6fa20c1211c6faef93ee73d7c"
-                }
-            ]
-        },
-        {
-            "Array": [
-                {
-                    "Array": [
-                        {
-                            "Uint": "0x186b"
-                        },
-                        {
-                            "Uint": "0x3aa"
-                        },
-                        {
-                            "Uint": "0x13ea"
-                        }
-                    ]
-                },
-                {
-                    "Array": [
-                        {
-                            "Uint": "0x80c"
-                        },
-                        {
-                            "Uint": "0xeef"
-                        },
-                        {
-                            "Uint": "0xeee"
-                        },
-                        {
-                            "Uint": "0xf5"
-                        }
-                    ]
-                }
-            ]
-        }
-    ]
+        ]
+    }
 }
