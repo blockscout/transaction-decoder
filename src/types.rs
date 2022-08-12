@@ -38,7 +38,9 @@ pub struct ResponseMethod {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResponseParam {
     name: String,
+    #[serde(rename(serialize = "internalType"))]
     internal_type: Option<String>,
+    #[serde(rename(serialize = "type"))]
     kind: String,
     value: String,
 }

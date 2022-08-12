@@ -4,8 +4,8 @@
         "inputs": [
             {
                 "name": "key",
-                "internal_type": "uint256",
-                "kind": "uint256",
+                "internalType": "uint256",
+                "type": "uint256",
                 "value": "2"
             }
         ]

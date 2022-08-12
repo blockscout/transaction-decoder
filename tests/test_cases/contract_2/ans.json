@@ -4,14 +4,14 @@
         "inputs": [
             {
                 "name": "nfts",
-                "internal_type": "address[]",
-                "kind": "address[]",
+                "internalType": "address[]",
+                "type": "address[]",
                 "value": "[0xef9c21e3ba31a74910fc7e7cb3fc814ad842ad6e, 0x3d74450d135f16b6fa20c1211c6faef93ee73d7c]"
             },
             {
                 "name": "tokenIds",
-                "internal_type": "uint256[][]",
-                "kind": "uint256[][]",
+                "internalType": "uint256[][]",
+                "type": "uint256[][]",
                 "value": "[[6251, 938, 5098], [2060, 3823, 3822, 245]]"
             }
         ]

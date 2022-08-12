@@ -4,8 +4,8 @@
         "inputs": [
             {
                 "name": "a",
-                "internal_type": "structFoo.Kek[]",
-                "kind": "tuple[]",
+                "internalType": "structFoo.Kek[]",
+                "type": "tuple[]",
                 "value": "[(12312312413,0x1aeddadedae0dd),(12312412351234,0x123124123124)]"
             }
         ]

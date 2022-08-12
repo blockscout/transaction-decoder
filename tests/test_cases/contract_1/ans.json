@@ -4,14 +4,14 @@
         "inputs": [
             {
                 "name": "to",
-                "internal_type": "address",
-                "kind": "address",
+                "internalType": "address",
+                "type": "address",
                 "value": "0xbe9dc33cf6a8f2a89689c9204613307dfc16d104"
             },
             {
                 "name": "amount",
-                "internal_type": "uint256",
-                "kind": "uint256",
+                "internalType": "uint256",
+                "type": "uint256",
                 "value": "5287628571428571428"
             }
         ]

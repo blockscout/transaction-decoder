@@ -4,20 +4,20 @@
         "inputs": [
             {
                 "name": "",
-                "internal_type": "bytes",
-                "kind": "bytes",
+                "internalType": "bytes",
+                "type": "bytes",
                 "value": "0x64617665"
             },
             {
                 "name": "",
-                "internal_type": "bool",
-                "kind": "bool",
+                "internalType": "bool",
+                "type": "bool",
                 "value": "true"
             },
             {
                 "name": "",
-                "internal_type": "uint256[]",
-                "kind": "uint256[]",
+                "internalType": "uint256[]",
+                "type": "uint256[]",
                 "value": "[1,2,3]"
             }
         ]
