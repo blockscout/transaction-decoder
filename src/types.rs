@@ -77,12 +77,12 @@ fn format_bytes(bytes: &[u8]) -> String {
     )
 }
 
-fn format_tokens(tokens: &[Token], sep: &str) -> String {
+fn format_tokens(tokens: &[Token]) -> String {
     tokens
         .iter()
         .map(|x| x.display())
         .collect::<Vec<String>>()
-        .join(sep)
+        .join(",")
 }
 
 impl ResponseDisplay for Token {
@@ -94,9 +94,9 @@ impl ResponseDisplay for Token {
             Token::Int(n) | Token::Uint(n) => format!("{:?}", n),
             Token::Bool(b) => format!("{:?}", b),
             Token::FixedArray(tokens) | Token::Array(tokens) => {
-                format!("[{}]", format_tokens(tokens, ""))
+                format!("[{}]", format_tokens(tokens))
             }
-            Token::Tuple(tokens) => format!("({})", format_tokens(tokens, ",")),
+            Token::Tuple(tokens) => format!("({})", format_tokens(tokens)),
         }
     }
 }
