@@ -59,7 +59,7 @@ impl ResponseDisplay for ParamType {
             ParamType::Array(t) => format!("{}[]", t.display()),
             ParamType::FixedBytes(n) => format!("bytes{}", n),
             ParamType::FixedArray(t, n) => format!("{}[{}]", t.display(), n),
-            ParamType::Tuple(_) => format!("tuple"),
+            ParamType::Tuple(_) => "tuple".to_string(),
         }
     }
 }
@@ -107,7 +107,6 @@ impl ResponseMethod {
                 name: f.name.clone(),
                 inputs: f
                     .inputs
-                    .clone()
                     .iter()
                     .zip(f.decode_input(data)?.iter())
                     .map(|(input, token)| ResponseParam::new(input, token))
