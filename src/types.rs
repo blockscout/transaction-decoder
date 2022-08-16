@@ -188,6 +188,7 @@ impl DecodedEvent {
 #[derive(Deserialize, Debug, Serialize)]
 pub struct DecodedEventParam {
     pub name: String,
+    #[serde(rename(serialize = "type"))]
     pub kind: String,
     pub indexed: bool,
     pub value: String,
