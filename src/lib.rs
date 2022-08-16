@@ -5,12 +5,13 @@ mod types;
 
 use crate::{
     error::Error,
-    types::{
-        AbiResponse, EventRequest, EventResponse, Response, ResponseMethod, Transaction, TxLog,
-    },
+    types::{AbiResponse, EventResponse, Response, ResponseMethod, Transaction, TxLog},
 };
 
-pub use crate::{bytes::Bytes as DisplayBytes, types::Request};
+pub use crate::{
+    bytes::Bytes as DisplayBytes,
+    types::{EventRequest, Request},
+};
 pub use handlers::{decode, decode_events};
 
 use actix_web::{web, App, HttpServer};
