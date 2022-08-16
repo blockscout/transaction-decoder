@@ -1,7 +1,9 @@
 use crate::DisplayBytes;
 use serde::{Deserialize, Serialize};
 
-use ethabi::{Contract, Error, Function, Param, ParamType, Token};
+use ethabi::{
+    Contract, Error, Event, EventParam, Function, Log, LogParam, Param, ParamType, Token,
+};
 
 type Result<T> = std::result::Result<T, Error>;
 
@@ -10,6 +12,13 @@ pub struct Request {
     pub tx_hash: DisplayBytes,
     pub abi: Contract,
     pub network: String,
+}
+
+#[derive(Deserialize, Debug, Serialize)]
+pub struct AbiResponse {
+    pub message: String,
+    pub result: Option<String>, //Option<Contract>,
+    pub status: String,
 }
 
 #[derive(Deserialize, Debug)]
@@ -22,6 +31,7 @@ pub struct Transaction {
 #[derive(Deserialize, Debug)]
 pub struct TransactionInput {
     pub input: DisplayBytes,
+    pub logs: Vec<TxLog>,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -118,6 +128,78 @@ impl ResponseParam {
             kind: param.kind.display(),
             internal_type: param.internal_type,
             value: token.display(),
+        }
+    }
+}
+#[derive(Deserialize, Debug, Serialize)]
+pub struct EventRequest {
+    pub tx_hash: DisplayBytes,
+    pub network: String,
+}
+
+#[derive(Deserialize, Debug, Serialize)]
+pub struct TxLog {
+    pub address: DisplayBytes,
+    pub data: DisplayBytes,
+    pub index: String,
+    pub topics: [Option<DisplayBytes>; 4],
+}
+
+#[derive(Deserialize, Debug, Serialize)]
+pub struct EventResponse {
+    pub events: Vec<DecodedEvent>,
+}
+
+impl EventResponse {
+    pub fn new(events: Vec<(Event, Log, String)>) -> EventResponse {
+        EventResponse {
+            events: events
+                .iter()
+                .map(|(e, l, i)| DecodedEvent::new(e, l, i))
+                .collect(),
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, Serialize)]
+pub struct DecodedEvent {
+    pub name: String,
+    pub anonymous: bool,
+    pub inputs: Vec<DecodedEventParam>,
+    pub index: String,
+}
+
+impl DecodedEvent {
+    pub fn new(event: &Event, log: &Log, index: &str) -> DecodedEvent {
+        DecodedEvent {
+            name: event.name.clone(),
+            anonymous: event.anonymous,
+            index: index.to_owned(),
+            inputs: log
+                .params
+                .iter()
+                .zip(event.inputs.iter())
+                .map(|(p1, p2)| DecodedEventParam::new(p1, p2))
+                .collect(),
+        }
+    }
+}
+
+#[derive(Deserialize, Debug, Serialize)]
+pub struct DecodedEventParam {
+    pub name: String,
+    pub kind: String,
+    pub indexed: bool,
+    pub value: String,
+}
+
+impl DecodedEventParam {
+    pub fn new(log_param: &LogParam, event_param: &EventParam) -> DecodedEventParam {
+        DecodedEventParam {
+            name: event_param.name.clone(),
+            kind: event_param.kind.display(),
+            indexed: event_param.indexed,
+            value: log_param.value.display(),
         }
     }
 }
