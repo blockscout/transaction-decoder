@@ -36,9 +36,9 @@ pub struct ResponseMethod {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 pub struct ResponseParam {
     name: String,
-    #[serde(rename(serialize = "internalType"))]
     internal_type: Option<String>,
     #[serde(rename(serialize = "type"))]
     kind: String,
@@ -66,23 +66,19 @@ impl ResponseDisplay for ParamType {
     }
 }
 
-fn format_bytes(bytes: &[u8]) -> String {
-    format!(
-        "0x{}",
-        bytes
-            .iter()
-            .map(|x| format!("{:x?}", x))
-            .collect::<Vec<String>>()
-            .join("")
-    )
+impl ResponseDisplay for &Vec<u8> {
+    fn display(&self) -> String {
+        "0x".to_string() + &hex::encode(self)
+    }
 }
 
-fn format_tokens(tokens: &[Token]) -> String {
-    tokens
-        .iter()
-        .map(|x| x.display())
-        .collect::<Vec<String>>()
-        .join(",")
+impl ResponseDisplay for &Vec<Token> {
+    fn display(&self) -> String {
+        self.iter()
+            .map(|x| x.display())
+            .collect::<Vec<String>>()
+            .join(",")
+    }
 }
 
 impl ResponseDisplay for Token {
@@ -90,41 +86,73 @@ impl ResponseDisplay for Token {
         match self {
             Token::String(s) => s.clone(),
             Token::Address(ad) => format!("{:?}", ad),
-            Token::Bytes(b) | Token::FixedBytes(b) => format_bytes(b),
+            Token::Bytes(b) | Token::FixedBytes(b) => b.display(),
             Token::Int(n) | Token::Uint(n) => format!("{:?}", n),
             Token::Bool(b) => format!("{:?}", b),
             Token::FixedArray(tokens) | Token::Array(tokens) => {
-                format!("[{}]", format_tokens(tokens))
+                format!("[{}]", tokens.display())
             }
-            Token::Tuple(tokens) => format!("({})", format_tokens(tokens)),
+            Token::Tuple(tokens) => format!("({})", tokens.display()),
         }
     }
 }
 
 impl ResponseMethod {
-    pub fn new(function: Option<Function>, data: &[u8]) -> Result<Option<ResponseMethod>> {
-        match function {
-            Some(f) => Ok(Some(ResponseMethod {
-                name: f.name.clone(),
-                inputs: f
-                    .inputs
-                    .iter()
-                    .zip(f.decode_input(data)?.iter())
-                    .map(|(input, token)| ResponseParam::new(input, token))
-                    .collect(),
-            })),
-            None => Ok(None),
-        }
+    pub fn new(function: Function, data: &[u8]) -> Result<ResponseMethod> {
+        Ok(ResponseMethod {
+            name: function.name.clone(),
+            inputs: function
+                .inputs
+                .iter()
+                .zip(function.decode_input(data)?.iter())
+                .map(|(input, token)| ResponseParam::new(input.clone(), token.clone()))
+                .collect(),
+        })
     }
 }
 
 impl ResponseParam {
-    fn new(param: &Param, token: &Token) -> ResponseParam {
+    fn new(param: Param, token: Token) -> ResponseParam {
         ResponseParam {
             name: param.name.clone(),
             kind: param.kind.display(),
             internal_type: param.internal_type.clone(),
             value: token.display(),
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+
+    use ::ethabi::Token;
+
+    use crate::types::ResponseDisplay;
+
+    #[test]
+    fn test_response_display_for_token() {
+        let v: Vec<u8> = vec![1, 2, 3, 4];
+        assert_eq!(Token::Bytes(v.clone()).display(), "0x01020304".to_string());
+        assert_eq!(
+            Token::FixedBytes(v.clone()).display(),
+            "0x01020304".to_string()
+        );
+
+        let mut token_vec: Vec<Token> = vec![
+            Token::Bytes(v.clone()),
+            Token::Bytes(v.clone()),
+            Token::Bytes(v.clone()),
+        ];
+        assert_eq!(
+            Token::Array(token_vec.clone()).display(),
+            "[0x01020304,0x01020304,0x01020304]".to_string()
+        );
+
+        token_vec = vec![Token::Array(token_vec.clone()), Token::Bytes(v.clone())];
+
+        assert_eq!(
+            Token::Tuple(token_vec.clone()).display(),
+            "([0x01020304,0x01020304,0x01020304],0x01020304)".to_string()
+        );
     }
 }

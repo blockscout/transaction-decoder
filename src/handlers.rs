@@ -61,7 +61,10 @@ pub async fn decode(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
     let method = find_abi_method_by_txn_input(&txn_input.0, &req.abi).await?;
     let response = Response {
-        method: ResponseMethod::new(method, &txn_input.0[4..]).map_err(|err| anyhow!(err))?,
+        method: match method {
+            Some(f) => Some(ResponseMethod::new(f, &txn_input.0[4..]).map_err(|err| anyhow!(err))?),
+            None => None,
+        },
     };
     Ok(web::Json(response))
 }

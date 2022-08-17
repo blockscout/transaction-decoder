@@ -1,9 +1,9 @@
-mod utilities;
+mod test_case;
 
 use actix_web::{test, web, App};
 use transaction_decoder::decode;
 
-use utilities::{read_test_case, start_test};
+use test_case::{read_test_case, start_test};
 
 #[actix_web::test]
 async fn simple_empty_request_test() {
