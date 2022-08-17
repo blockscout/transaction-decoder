@@ -114,9 +114,9 @@ impl ResponseMethod {
 impl ResponseParam {
     fn new(param: Param, token: Token) -> ResponseParam {
         ResponseParam {
-            name: param.name.clone(),
+            name: param.name,
             kind: param.kind.display(),
-            internal_type: param.internal_type.clone(),
+            internal_type: param.internal_type,
             value: token.display(),
         }
     }
