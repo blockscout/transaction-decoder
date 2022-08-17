@@ -90,16 +90,16 @@ async fn get_tx_logs(txn_hash: &DisplayBytes, network: &String) -> Result<Vec<Tx
     if res.status != "1" {
         return Err(Error::GetTxInfo(res.message));
     }
-    match res.result {
-        Some(result) => Ok(result.logs),
-        None => Err(Error::GetTxInfo("Jops".to_string())),
-    }
+
+    res.result
+        .map(|result| result.logs)
+        .ok_or_else(|| Error::Other(anyhow!("Missing input block")))
 }
 
-async fn get_contract_abi(address: &DisplayBytes) -> Result<Contract> {
+async fn get_contract_abi(network: &String, address: &DisplayBytes) -> Result<Contract> {
     let res = reqwest::get(format!(
-        "https://blockscout.com/eth/mainnet/api?module=contract&action=getabi&address={}",
-        address
+        "https://blockscout.com/{}/api?module=contract&action=getabi&address={}",
+        network, address
     ))
     .await
     .map_err(|err| anyhow!(err))?;
@@ -116,26 +116,30 @@ async fn get_contract_abi(address: &DisplayBytes) -> Result<Contract> {
 
     let c: Contract = serde_json::from_str(
         &res.result
-            .ok_or_else(|| Error::GetTxInfo("Abi parsing failed".to_string()))?,
+            .ok_or_else(|| anyhow!("Abi parsing failed".to_string()))?,
     )
     .map_err(|err| anyhow!(err))?;
 
     Ok(c)
 }
 
-async fn get_log_event(log: &TxLog, abi_map: &mut HashMap<Vec<u8>, Contract>) -> Result<Event> {
+async fn get_log_event(
+    network: &String,
+    log: &TxLog,
+    abi_map: &mut HashMap<Vec<u8>, Contract>,
+) -> Result<Event> {
     abi_map
         .entry(log.address.to_vec())
-        .or_insert(get_contract_abi(&log.address).await?);
+        .or_insert(get_contract_abi(network, &log.address).await?);
 
     let abi = abi_map
         .get(&log.address.to_vec())
-        .ok_or_else(|| Error::GetTxInfo("Failed to get abi".to_string()))?;
+        .ok_or_else(|| anyhow!("Failed to get abi".to_string()))?;
 
     for event in abi.events() {
         if log.topics[0]
             .clone()
-            .ok_or_else(|| Error::GetTxInfo("Failed to decode anonymous event".to_string()))?
+            .ok_or_else(|| anyhow!("Failed to decode anonymous event".to_string()))?
             .0
             == event.signature().as_bytes()
         {
@@ -143,16 +147,16 @@ async fn get_log_event(log: &TxLog, abi_map: &mut HashMap<Vec<u8>, Contract>) ->
         }
     }
 
-    Err(Error::GetTxInfo("Failed to find event".to_string()))
+    Err(Error::Other(anyhow!("Failed to find event".to_string())))
 }
 
-async fn procces_events(logs: &Vec<TxLog>) -> Result<Vec<(Event, Log, String)>> {
+async fn procces_events(network: &String, logs: &Vec<TxLog>) -> Result<Vec<(Event, Log, String)>> {
     let mut abi_map: HashMap<Vec<u8>, Contract> = HashMap::new();
 
     let mut proccesed_events: Vec<(Event, Log, String)> = Vec::new();
 
     for log in logs {
-        let event = match get_log_event(log, &mut abi_map).await {
+        let event = match get_log_event(network, log, &mut abi_map).await {
             Ok(v) => v,
             Err(_) => continue,
         };
@@ -176,7 +180,7 @@ async fn procces_events(logs: &Vec<TxLog>) -> Result<Vec<(Event, Log, String)>> 
 
 pub async fn decode_events(req: web::Json<EventRequest>) -> Result<impl Responder> {
     let logs = get_tx_logs(&req.tx_hash, &req.network).await?;
-    let proccesed_events = procces_events(&logs).await?;
+    let proccesed_events = procces_events(&req.network, &logs).await?;
     let response = EventResponse::new(proccesed_events);
     Ok(web::Json(response))
 }
