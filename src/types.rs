@@ -66,13 +66,13 @@ impl ResponseDisplay for ParamType {
     }
 }
 
-impl ResponseDisplay for &Vec<u8> {
+impl ResponseDisplay for &[u8] {
     fn display(&self) -> String {
         "0x".to_string() + &hex::encode(self)
     }
 }
 
-impl ResponseDisplay for &Vec<Token> {
+impl ResponseDisplay for &[Token] {
     fn display(&self) -> String {
         self.iter()
             .map(|x| x.display())
@@ -86,13 +86,13 @@ impl ResponseDisplay for Token {
         match self {
             Token::String(s) => s.clone(),
             Token::Address(ad) => format!("{:?}", ad),
-            Token::Bytes(b) | Token::FixedBytes(b) => b.display(),
+            Token::Bytes(b) | Token::FixedBytes(b) => (&b[..]).display(),
             Token::Int(n) | Token::Uint(n) => format!("{:?}", n),
             Token::Bool(b) => format!("{:?}", b),
             Token::FixedArray(tokens) | Token::Array(tokens) => {
-                format!("[{}]", tokens.display())
+                format!("[{}]", (&tokens[..]).display())
             }
-            Token::Tuple(tokens) => format!("({})", tokens.display()),
+            Token::Tuple(tokens) => format!("({})", (&tokens[..]).display()),
         }
     }
 }

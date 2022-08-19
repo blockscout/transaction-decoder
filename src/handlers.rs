@@ -64,7 +64,7 @@ pub async fn decode(req: web::Json<Request>) -> Result<impl Responder> {
         method: method
             .map(|x| ResponseMethod::new(x, &txn_input.0[4..]))
             .transpose()
-            .map_err(|err| anyhow!(err))?,
+            .map_err(anyhow::Error::msg)?,
     };
     Ok(web::Json(response))
 }
