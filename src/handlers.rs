@@ -1,6 +1,6 @@
 use actix_web::{http::StatusCode, web, Responder};
 use anyhow::anyhow;
-use ethabi::{ethereum_types::H256, Contract, Event, Function, Log, RawLog};
+use ethabi::{Contract, Event, Function, Log, RawLog};
 use std::collections::HashMap;
 
 use crate::DisplayBytes;

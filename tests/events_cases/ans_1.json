@@ -2,7 +2,6 @@
     "events": [
         {
             "name": "Transfer",
-            "anonymous": false,
             "inputs": [
                 {
                     "name": "from",
