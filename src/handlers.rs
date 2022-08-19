@@ -128,17 +128,13 @@ async fn get_log_event(
     log: &TxLog,
     abi_map: &mut HashMap<Vec<u8>, Contract>,
 ) -> Result<Event> {
-    abi_map
+    let abi = abi_map
         .entry(log.address.to_vec())
         .or_insert(get_contract_abi(network, &log.address).await?);
 
-    let abi = abi_map
-        .get(&log.address.to_vec())
-        .ok_or_else(|| anyhow!("Failed to get abi".to_string()))?;
-
     for event in abi.events() {
         if log.topics[0]
-            .clone()
+            .as_ref()
             .ok_or_else(|| anyhow!("Failed to decode anonymous event".to_string()))?
             .0
             == event.signature().as_bytes()
@@ -150,37 +146,37 @@ async fn get_log_event(
     Err(Error::Other(anyhow!("Failed to find event".to_string())))
 }
 
-async fn procces_events(network: &String, logs: &Vec<TxLog>) -> Result<Vec<(Event, Log, String)>> {
+async fn process_events(network: &String, logs: &Vec<TxLog>) -> Result<Vec<(Event, Log, String)>> {
     let mut abi_map: HashMap<Vec<u8>, Contract> = HashMap::new();
 
-    let mut proccesed_events: Vec<(Event, Log, String)> = Vec::new();
+    let mut processed_events: Vec<(Event, Log, String)> = Vec::new();
 
     for log in logs {
         let event = match get_log_event(network, log, &mut abi_map).await {
             Ok(v) => v,
             Err(_) => continue,
         };
-        let parced_log = event
+        let parsed_log = event
             .parse_log(RawLog {
                 data: log.data.to_vec(),
                 topics: log
                     .topics
                     .iter()
                     .filter(|x| **x != None)
-                    .map(|x| H256::from_slice(&x.clone().unwrap().to_vec()))
+                    .map(|x| x.unwrap())
                     .collect(),
             })
             .map_err(|err| anyhow!(err))?;
 
-        proccesed_events.push((event, parced_log, log.index.to_string()));
+        processed_events.push((event, parsed_log, log.index.to_string()));
     }
 
-    Ok(proccesed_events)
+    Ok(processed_events)
 }
 
 pub async fn decode_events(req: web::Json<EventRequest>) -> Result<impl Responder> {
     let logs = get_tx_logs(&req.tx_hash, &req.network).await?;
-    let proccesed_events = procces_events(&req.network, &logs).await?;
+    let proccesed_events = process_events(&req.network, &logs).await?;
     let response = EventResponse::new(proccesed_events);
     Ok(web::Json(response))
 }

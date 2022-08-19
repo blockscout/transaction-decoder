@@ -2,7 +2,7 @@ use crate::DisplayBytes;
 use serde::{Deserialize, Serialize};
 
 use ethabi::{
-    Contract, Error, Event, EventParam, Function, Log, LogParam, Param, ParamType, Token,
+    Contract, Error, Event, EventParam, Function, Hash, Log, LogParam, Param, ParamType, Token,
 };
 
 type Result<T> = std::result::Result<T, Error>;
@@ -17,7 +17,7 @@ pub struct Request {
 #[derive(Deserialize, Debug, Serialize)]
 pub struct AbiResponse {
     pub message: String,
-    pub result: Option<String>, //Option<Contract>,
+    pub result: Option<String>,
     pub status: String,
 }
 
@@ -142,7 +142,7 @@ pub struct TxLog {
     pub address: DisplayBytes,
     pub data: DisplayBytes,
     pub index: String,
-    pub topics: [Option<DisplayBytes>; 4],
+    pub topics: [Option<Hash>; 4],
 }
 
 #[derive(Deserialize, Debug, Serialize)]
@@ -164,7 +164,6 @@ impl EventResponse {
 #[derive(Deserialize, Debug, Serialize)]
 pub struct DecodedEvent {
     pub name: String,
-    pub anonymous: bool,
     pub inputs: Vec<DecodedEventParam>,
     pub index: String,
 }
@@ -173,7 +172,6 @@ impl DecodedEvent {
     pub fn new(event: &Event, log: &Log, index: &str) -> DecodedEvent {
         DecodedEvent {
             name: event.name.clone(),
-            anonymous: event.anonymous,
             index: index.to_owned(),
             inputs: log
                 .params
