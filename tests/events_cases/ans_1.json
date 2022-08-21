@@ -1,0 +1,28 @@
+{
+    "events": [
+        {
+            "name": "Transfer",
+            "inputs": [
+                {
+                    "name": "from",
+                    "type": "address",
+                    "indexed": true,
+                    "value": "0x5189997cbe983a48bf67c8ec9b8eaff97a197f0f"
+                },
+                {
+                    "name": "to",
+                    "type": "address",
+                    "indexed": true,
+                    "value": "0xfb955351bf76d99be2b66a11b2b8909559f9e1a5"
+                },
+                {
+                    "name": "value",
+                    "type": "uint256",
+                    "indexed": false,
+                    "value": "500000000"
+                }
+            ],
+            "index": "499"
+        }
+    ]
+}
