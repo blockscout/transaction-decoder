@@ -1,0 +1,87 @@
+[
+    {
+        "inputs": [
+            {
+                "internalType": "bytes3[2]",
+                "name": "",
+                "type": "bytes3[2]"
+            }
+        ],
+        "name": "bar",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "uint32",
+                "name": "x",
+                "type": "uint32"
+            },
+            {
+                "internalType": "bool",
+                "name": "y",
+                "type": "bool"
+            }
+        ],
+        "name": "baz",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "r",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "internalType": "bytes",
+                "name": "",
+                "type": "bytes"
+            },
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            },
+            {
+                "internalType": "uint256[]",
+                "name": "",
+                "type": "uint256[]"
+            }
+        ],
+        "name": "sam",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    },
+    {
+        "inputs": [
+            {
+                "components": [
+                    {
+                        "internalType": "uint256",
+                        "name": "num",
+                        "type": "uint256"
+                    },
+                    {
+                        "internalType": "bytes",
+                        "name": "b",
+                        "type": "bytes"
+                    }
+                ],
+                "internalType": "struct Foo.Kek[]",
+                "name": "a",
+                "type": "tuple[]"
+            }
+        ],
+        "name": "some",
+        "outputs": [],
+        "stateMutability": "payable",
+        "type": "function"
+    }
+]

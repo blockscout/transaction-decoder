@@ -1,0 +1,25 @@
+{
+    "method": {
+        "name": "sam",
+        "inputs": [
+            {
+                "name": "",
+                "internalType": "bytes",
+                "type": "bytes",
+                "value": "0x64617665"
+            },
+            {
+                "name": "",
+                "internalType": "bool",
+                "type": "bool",
+                "value": "true"
+            },
+            {
+                "name": "",
+                "internalType": "uint256[]",
+                "type": "uint256[]",
+                "value": "[1,2,3]"
+            }
+        ]
+    }
+}

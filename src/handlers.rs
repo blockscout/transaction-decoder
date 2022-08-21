@@ -1,35 +1,12 @@
-use actix_web::{error, http::StatusCode, web, Responder};
+use actix_web::{http::StatusCode, web, Responder};
 use anyhow::anyhow;
 use ethabi::{Contract, Function};
 
 use crate::DisplayBytes;
-use thiserror::Error;
 
-use crate::{Request, Response, Transaction};
+use crate::{Error, Request, Response, ResponseMethod, Transaction};
 
 type Result<T> = std::result::Result<T, Error>;
-
-#[derive(Debug, Error)]
-pub enum Error {
-    #[error("not found")]
-    NotFound,
-
-    #[error("Error while getting tx info: {0}")]
-    GetTxInfo(String),
-
-    #[error("{0}")]
-    Other(#[from] anyhow::Error),
-}
-
-impl error::ResponseError for Error {
-    fn status_code(&self) -> StatusCode {
-        match *self {
-            Error::NotFound => StatusCode::BAD_REQUEST,
-            Error::GetTxInfo(_) => StatusCode::BAD_REQUEST,
-            Error::Other(_) => StatusCode::INTERNAL_SERVER_ERROR,
-        }
-    }
-}
 
 async fn get_txn_input(txn_hash: &DisplayBytes, network: &String) -> Result<DisplayBytes> {
     let res = reqwest::get(format!(
@@ -83,6 +60,11 @@ async fn find_abi_method_by_txn_input(
 pub async fn decode(req: web::Json<Request>) -> Result<impl Responder> {
     let txn_input = get_txn_input(&req.tx_hash, &req.network).await?;
     let method = find_abi_method_by_txn_input(&txn_input.0, &req.abi).await?;
-    let response = Response { method };
+    let response = Response {
+        method: method
+            .map(|x| ResponseMethod::new(x, &txn_input.0[4..]))
+            .transpose()
+            .map_err(anyhow::Error::msg)?,
+    };
     Ok(web::Json(response))
 }
