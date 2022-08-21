@@ -99,14 +99,16 @@ impl ResponseDisplay for Token {
 
 impl ResponseMethod {
     pub fn new(function: Function, data: &[u8]) -> Result<ResponseMethod> {
+        let decoded = function.decode_input(data)?.into_iter();
+        let inputs = function
+            .inputs
+            .into_iter()
+            .zip(decoded)
+            .map(|(input, token)| ResponseParam::new(input, token))
+            .collect();
         Ok(ResponseMethod {
-            name: function.name.clone(),
-            inputs: function
-                .inputs
-                .iter()
-                .zip(function.decode_input(data)?.iter())
-                .map(|(input, token)| ResponseParam::new(input.clone(), token.clone()))
-                .collect(),
+            name: function.name,
+            inputs,
         })
     }
 }
