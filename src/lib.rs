@@ -5,7 +5,9 @@ mod types;
 
 use crate::{
     error::Error,
-    types::{AbiResponse, EventResponse, Response, ResponseMethod, Transaction, TxLog},
+    types::{
+        AbiResponse, DecodedEvent, EventResponse, Response, ResponseMethod, Transaction, TxLog,
+    },
 };
 
 pub use crate::{

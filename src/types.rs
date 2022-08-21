@@ -147,17 +147,12 @@ pub struct TxLog {
 
 #[derive(Deserialize, Debug, Serialize)]
 pub struct EventResponse {
-    pub events: Vec<DecodedEvent>,
+    pub events: Vec<Option<DecodedEvent>>,
 }
 
 impl EventResponse {
-    pub fn new(events: Vec<(Event, Log, String)>) -> EventResponse {
-        EventResponse {
-            events: events
-                .iter()
-                .map(|(e, l, i)| DecodedEvent::new(e, l, i))
-                .collect(),
-        }
+    pub fn new(events: Vec<Option<DecodedEvent>>) -> EventResponse {
+        EventResponse { events }
     }
 }
 
@@ -169,16 +164,17 @@ pub struct DecodedEvent {
 }
 
 impl DecodedEvent {
-    pub fn new(event: &Event, log: &Log, index: &str) -> DecodedEvent {
+    pub fn new(event: Event, log: Log, index: &str) -> DecodedEvent {
+        let inputs = log
+            .params
+            .into_iter()
+            .zip(event.inputs.into_iter())
+            .map(|(p1, p2)| DecodedEventParam::new(p1, p2))
+            .collect();
         DecodedEvent {
-            name: event.name.clone(),
+            name: event.name,
             index: index.to_owned(),
-            inputs: log
-                .params
-                .iter()
-                .zip(event.inputs.iter())
-                .map(|(p1, p2)| DecodedEventParam::new(p1, p2))
-                .collect(),
+            inputs,
         }
     }
 }
@@ -193,9 +189,9 @@ pub struct DecodedEventParam {
 }
 
 impl DecodedEventParam {
-    pub fn new(log_param: &LogParam, event_param: &EventParam) -> DecodedEventParam {
+    pub fn new(log_param: LogParam, event_param: EventParam) -> DecodedEventParam {
         DecodedEventParam {
-            name: event_param.name.clone(),
+            name: event_param.name,
             kind: event_param.kind.display(),
             indexed: event_param.indexed,
             value: log_param.value.display(),
