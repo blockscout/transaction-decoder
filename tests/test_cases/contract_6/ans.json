@@ -1,0 +1,13 @@
+{
+    "method": {
+        "name": "some",
+        "inputs": [
+            {
+                "name": "a",
+                "internalType": "structFoo.Kek[]",
+                "type": "tuple[]",
+                "value": "[(12312312413,0x01aeddadedae00dd),(12312412351234,0x123124123124)]"
+            }
+        ]
+    }
+}

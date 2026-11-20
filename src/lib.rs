@@ -1,8 +1,12 @@
 mod bytes;
+mod error;
 mod handlers;
 mod types;
 
-use crate::types::{Response, Transaction};
+use crate::{
+    error::Error,
+    types::{Response, ResponseMethod, Transaction},
+};
 
 pub use crate::{bytes::Bytes as DisplayBytes, types::Request};
 pub use handlers::decode;

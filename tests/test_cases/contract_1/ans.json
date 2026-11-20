@@ -3,23 +3,17 @@
         "name": "transfer",
         "inputs": [
             {
-                "internalType": "address",
                 "name": "to",
-                "type": "address"
+                "internalType": "address",
+                "type": "address",
+                "value": "0xbe9dc33cf6a8f2a89689c9204613307dfc16d104"
             },
             {
-                "internalType": "uint256",
                 "name": "amount",
-                "type": "uint256"
+                "internalType": "uint256",
+                "type": "uint256",
+                "value": "5287628571428571428"
             }
-        ],
-        "outputs": [
-            {
-                "internalType": "bool",
-                "name": "",
-                "type": "bool"
-            }
-        ],
-        "stateMutability": "nonpayable"
+        ]
     }
 }

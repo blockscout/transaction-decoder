@@ -1,35 +1,9 @@
+mod test_case;
+
 use actix_web::{test, web, App};
-use ethabi::Contract;
-use std::{
-    fs,
-    str::{from_utf8, FromStr},
-};
-use transaction_decoder::{decode, DisplayBytes, Request};
+use transaction_decoder::decode;
 
-fn read_test_case(num: u32, txn: &str, network: String) -> (Request, String) {
-    let abi = fs::read_to_string(format!("tests/test_cases/contract_{}/abi.json", num)).unwrap();
-    let abi: Contract = serde_json::from_str(&abi).unwrap();
-    let txn = DisplayBytes::from_str(txn).expect("Invalid transaction hash");
-    let ans = fs::read_to_string(format!("tests/test_cases/contract_{}/ans.json", num)).unwrap();
-
-    (
-        Request {
-            abi,
-            tx_hash: txn,
-            network,
-        },
-        ans.replace(" ", "").replace("\n", ""),
-    )
-}
-
-async fn start_test(data: &Request) -> actix_web::dev::ServiceResponse {
-    let app = test::init_service(App::new().route("/", web::post().to(decode))).await;
-    let req = test::TestRequest::post()
-        .uri("/")
-        .set_json(&data)
-        .to_request();
-    test::call_service(&app, req).await
-}
+use test_case::{read_test_case, start_test};
 
 #[actix_web::test]
 async fn simple_empty_request_test() {
@@ -144,4 +118,38 @@ async fn function_overload_test() {
     let body = test::read_body(resp).await;
 
     assert_eq!(body, ans);
+}
+
+#[actix_web::test]
+async fn bytes_bool_array_uint_test() {
+    let (data, ans) = read_test_case(
+        5,
+        "0xb52b6348d27ca1a535a284bab143d8c233b7ff6033469e0b180cc0bdd2f7ccf7",
+        "poa/sokol".to_string(),
+    );
+
+    let resp = start_test(&data).await;
+
+    assert!(resp.status().is_success());
+
+    let body = test::read_body(resp).await;
+
+    assert_eq!(body, ans);
+}
+
+#[actix_web::test]
+async fn struct_decode_test() {
+    let (data, ans) = read_test_case(
+        6,
+        "0xa9237344b1f40d33a37eaeb1076ca781b359c2810a30fb663fea9951a7c3243d",
+        "poa/sokol".to_string(),
+    );
+
+    let resp = start_test(&data).await;
+
+    assert!(resp.status().is_success());
+
+    let body = test::read_body(resp).await;
+
+    assert_eq!(std::str::from_utf8(&body).unwrap().replace(" ", ""), ans);
 }
